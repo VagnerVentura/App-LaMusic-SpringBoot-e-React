@@ -1,8 +1,11 @@
 package com.LaMusic.Mappers;
 
+import org.springframework.stereotype.Component;
+
 import com.LaMusic.dto.CouponDTO;
 import com.LaMusic.entity.Coupon;
 
+@Component
 public class CouponMapper {
 
 	 public CouponDTO toDTO(Coupon coupon) {
