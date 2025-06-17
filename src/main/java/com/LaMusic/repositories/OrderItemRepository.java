@@ -9,6 +9,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import com.LaMusic.dto.BestSellingProductDTO;
+import com.LaMusic.dto.CategoryTrendDTO;
+import com.LaMusic.dto.ReorderSuggestionDTO;
 import com.LaMusic.entity.OrderItem;
 
 public interface OrderItemRepository extends JpaRepository<OrderItem, UUID> {
@@ -28,5 +30,41 @@ public interface OrderItemRepository extends JpaRepository<OrderItem, UUID> {
 		        @Param("start") LocalDate start,
 		        @Param("end") LocalDate end
 		    );
+
+	 
+	 @Query("SELECT new com.LaMusic.dto.CategoryTrendDTO(c.name, o.createdAt, SUM(oi.quantity)) " +
+		       "FROM OrderItem oi " +
+		       "JOIN oi.product p " +
+		       "JOIN p.categories c " +
+		       "JOIN oi.order o " +
+		       "WHERE o.createdAt BETWEEN :start AND :end " +
+		       "GROUP BY c.name, o.createdAt " +
+		       "ORDER BY c.name, o.createdAt")
+		List<CategoryTrendDTO> findCategoryTrends(
+		    @Param("start") LocalDate start,
+		    @Param("end") LocalDate end
+		);
+	 
+	 @Query("""
+			    SELECT new com.LaMusic.dto.ReorderSuggestionDTO(
+			        p.id,
+			        p.name,
+			        p.stockQuantity,
+			        SUM(oi.quantity),
+			        CASE
+			            WHEN p.stockQuantity < SUM(oi.quantity) THEN SUM(oi.quantity) - p.stockQuantity
+			            ELSE 0
+			        END
+			    )
+			    FROM OrderItem oi
+			    JOIN oi.product p
+			    JOIN oi.order o
+			    WHERE o.createdAt BETWEEN :start AND :end
+			    GROUP BY p.id, p.name, p.stockQuantity
+			    HAVING p.stockQuantity < SUM(oi.quantity)
+			    ORDER BY SUM(oi.quantity) DESC
+			""")
+			List<ReorderSuggestionDTO> findReorderSuggestions(@Param("start") LocalDate start, @Param("end") LocalDate end);
+
 	
 }
