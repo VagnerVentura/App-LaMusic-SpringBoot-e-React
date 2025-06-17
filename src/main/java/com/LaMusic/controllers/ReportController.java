@@ -12,7 +12,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.LaMusic.dto.BestSellingProductDTO;
+import com.LaMusic.dto.CategoryTrendDTO;
 import com.LaMusic.dto.LowStockProductDTO;
+import com.LaMusic.dto.ReorderSuggestionDTO;
 import com.LaMusic.dto.SalesComparisonDTO;
 import com.LaMusic.dto.SalesReportDTO;
 import com.LaMusic.dto.SalesSummaryDTO;
@@ -82,5 +84,25 @@ public class ReportController {
 	    @RequestParam("end2") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end2) {
 
 	    return ResponseEntity.ok(reportService.getSalesComparison(start1, end1, start2, end2));
+	}
+	
+	//Exibir a quantidade de vendas ou receita total por categoria em intervalos de tempo (por exemplo, por semana ou por mês), para que o gestor identifique tendências.
+	//Diferencial: Ajuda o gestor a identificar onde investir ou promover.
+	@GetMapping("/category-trends")
+	public ResponseEntity<List<CategoryTrendDTO>> getCategoryTrends(
+	    @RequestParam("start") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,
+	    @RequestParam("end") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end) {
+	    
+	    return ResponseEntity.ok(reportService.getCategoryTrends(start, end));
+	}
+	
+	//Essa funcionalidade calcula quais produtos devem ser repostos com base em: Quantidade vendida em um intervalo de tempo, Estoque atual
+	//Gatilho: se estoque atual < média de vendas no período → sugerir reposição
+	@GetMapping("/reorder-suggestions")
+	public ResponseEntity<List<ReorderSuggestionDTO>> getReorderSuggestions(
+	    @RequestParam("start") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,
+	    @RequestParam("end") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end) {
+	    
+	    return ResponseEntity.ok(reportService.getReorderSuggestions(start, end));
 	}
 }
