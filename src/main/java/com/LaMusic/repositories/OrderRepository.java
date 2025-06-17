@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import com.LaMusic.dto.MonthlyRevenueProjectionDTO;
 import com.LaMusic.dto.SalesPeriodDTO;
 import com.LaMusic.dto.SalesSummaryDTO;
 import com.LaMusic.dto.SalesSummaryRawDTO;
@@ -78,5 +79,21 @@ public interface OrderRepository extends JpaRepository<Order, UUID> {
             @Param("start") LocalDate start,
             @Param("end") LocalDate end
         );
+    
+    @Query("""
+    	    SELECT new com.LaMusic.dto.MonthlyRevenueProjectionDTO(
+    	        EXTRACT(YEAR FROM o.orderDate) * 100 + EXTRACT(MONTH FROM o.orderDate),
+    	        SUM(o.totalAmount),
+    	        false
+    	    )
+    	    FROM Order o
+    	    WHERE o.orderDate BETWEEN :start AND :end
+    	    GROUP BY EXTRACT(YEAR FROM o.orderDate), EXTRACT(MONTH FROM o.orderDate)
+    	    ORDER BY EXTRACT(YEAR FROM o.orderDate), EXTRACT(MONTH FROM o.orderDate)
+    	""")
+    	List<MonthlyRevenueProjectionDTO> getMonthlyRevenues(
+    	    @Param("start") LocalDate start,
+    	    @Param("end") LocalDate end
+    	);
     
 }
