@@ -11,8 +11,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.LaMusic.dto.BestSellingProductDTO;
+import com.LaMusic.dto.CategoryTrendDTO;
 import com.LaMusic.dto.GrowthDTO;
 import com.LaMusic.dto.LowStockProductDTO;
+import com.LaMusic.dto.ReorderSuggestionDTO;
 import com.LaMusic.dto.SalePerDayDTO;
 import com.LaMusic.dto.SalesComparisonDTO;
 import com.LaMusic.dto.SalesPeriodDTO;
@@ -112,6 +114,14 @@ public class ReportService {
 		                   .divide(oldValue, 4, RoundingMode.HALF_UP)
 		                   .multiply(BigDecimal.valueOf(100))
 		                   .doubleValue();
+	}
+	
+	public List<CategoryTrendDTO> getCategoryTrends(LocalDate start, LocalDate end) {
+	    return orderItemRepository.findCategoryTrends(start, end);
+	}
+	
+	public List<ReorderSuggestionDTO> getReorderSuggestions(LocalDate start, LocalDate end) {
+	    return orderItemRepository.findReorderSuggestions(start, end);
 	}
 	
 }
