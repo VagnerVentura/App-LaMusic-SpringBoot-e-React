@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.LaMusic.dto.BestSellingProductDTO;
 import com.LaMusic.dto.CategoryTrendDTO;
 import com.LaMusic.dto.LowStockProductDTO;
+import com.LaMusic.dto.MonthlyRevenueProjectionDTO;
 import com.LaMusic.dto.ReorderSuggestionDTO;
 import com.LaMusic.dto.SalesComparisonDTO;
 import com.LaMusic.dto.SalesReportDTO;
@@ -105,4 +106,16 @@ public class ReportController {
 	    
 	    return ResponseEntity.ok(reportService.getReorderSuggestions(start, end));
 	}
+	
+	
+	//Um endpoint que retorna o faturamento real dos últimos meses e a projeção para os próximos meses
+	//Pode ser usado em gráficos (ex: Chart.js ou Recharts no front-end).
+	@GetMapping("/revenue-projection")
+	public ResponseEntity<List<MonthlyRevenueProjectionDTO>> getRevenueProjection(
+	    @RequestParam(name = "monthsBack", defaultValue = "6") int monthsBack,
+	    @RequestParam(name = "monthsAhead", defaultValue = "3") int monthsAhead
+	) {
+	    return ResponseEntity.ok(reportService.getRevenueProjection(monthsBack, monthsAhead));
+	}
+	
 }
