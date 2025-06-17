@@ -3,6 +3,8 @@ package com.LaMusic.services;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
+import java.time.YearMonth;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -14,6 +16,7 @@ import com.LaMusic.dto.BestSellingProductDTO;
 import com.LaMusic.dto.CategoryTrendDTO;
 import com.LaMusic.dto.GrowthDTO;
 import com.LaMusic.dto.LowStockProductDTO;
+import com.LaMusic.dto.MonthlyRevenueProjectionDTO;
 import com.LaMusic.dto.ReorderSuggestionDTO;
 import com.LaMusic.dto.SalePerDayDTO;
 import com.LaMusic.dto.SalesComparisonDTO;
@@ -122,6 +125,46 @@ public class ReportService {
 	
 	public List<ReorderSuggestionDTO> getReorderSuggestions(LocalDate start, LocalDate end) {
 	    return orderItemRepository.findReorderSuggestions(start, end);
+	}
+	
+	public List<MonthlyRevenueProjectionDTO> getRevenueProjection(int monthsBack, int monthsAhead) {
+	    LocalDate now = LocalDate.now();
+	    LocalDate start = now.minusMonths(monthsBack).withDayOfMonth(1);
+	    LocalDate end = now.withDayOfMonth(1).minusDays(1);
+
+	    List<MonthlyRevenueProjectionDTO> historico = orderRepository.getMonthlyRevenues(start, end);
+
+	    // calcular média dos últimos X meses
+	    BigDecimal media = historico.stream()
+	        .map(MonthlyRevenueProjectionDTO::getRevenue)
+	        .reduce(BigDecimal.ZERO, BigDecimal::add)
+	        .divide(new BigDecimal(historico.size()), 2, RoundingMode.HALF_UP);
+
+	    List<MonthlyRevenueProjectionDTO> resultado = new ArrayList<>(historico);
+
+	    YearMonth atual = YearMonth.from(LocalDate.now());
+
+	    for (int i = 1; i <= monthsAhead; i++) {
+	        YearMonth mesFuturo = atual.plusMonths(i);
+
+	        // Exemplo de sazonalidade simples
+	        BigDecimal projetado = media;
+	        if (mesFuturo.getMonthValue() == 12) {
+	            projetado = projetado.multiply(BigDecimal.valueOf(1.4)); // Dezembro
+	        } else if (mesFuturo.getMonthValue() == 1) {
+	            projetado = projetado.multiply(BigDecimal.valueOf(0.9)); // Janeiro
+	        }
+
+	        int mesFormatado = mesFuturo.getYear() * 100 + mesFuturo.getMonthValue();
+
+	        resultado.add(new MonthlyRevenueProjectionDTO(
+	            mesFormatado,
+	            projetado.setScale(2, RoundingMode.HALF_UP),
+	            true
+	        ));
+	    }
+
+	    return resultado;
 	}
 	
 }
