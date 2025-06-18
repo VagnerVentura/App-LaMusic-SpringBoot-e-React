@@ -16,6 +16,7 @@ import com.LaMusic.dto.CategoryTrendDTO;
 import com.LaMusic.dto.InactiveCustomerDTO;
 import com.LaMusic.dto.LowStockProductDTO;
 import com.LaMusic.dto.MonthlyRevenueProjectionDTO;
+import com.LaMusic.dto.MonthlyUserSignupDTO;
 import com.LaMusic.dto.ReorderSuggestionDTO;
 import com.LaMusic.dto.SalesComparisonDTO;
 import com.LaMusic.dto.SalesReportDTO;
@@ -118,7 +119,6 @@ public class ReportController {
 	) {
 	    return ResponseEntity.ok(reportService.getRevenueProjection(monthsBack, monthsAhead));
 	}
-
 	
 	// lista usuários que não fazem pedidos há mais de X meses.
 	@GetMapping("/clientes-inativos")
@@ -126,6 +126,16 @@ public class ReportController {
 	        @RequestParam(defaultValue = "6") int months
 	) {
 	    return ResponseEntity.ok(reportService.getInactiveCustomers(months));
+	}
+
+	@GetMapping("/monthly-users-signups")
+	public ResponseEntity<List<MonthlyUserSignupDTO>> getMonthlyUserSignups(
+	        @RequestParam int monthsBack) {
+
+	    LocalDate end = LocalDate.now();
+	    LocalDate start = end.minusMonths(monthsBack);
+
+	    return ResponseEntity.ok(reportService.getMonthlyUserSignups(start, end));
 	}
 
 	

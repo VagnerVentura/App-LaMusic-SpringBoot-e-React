@@ -1,6 +1,7 @@
 package com.LaMusic.repositories;
 
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -26,4 +27,14 @@ public interface UserRepository extends JpaRepository<User, UUID> {
 		""")
 		List<InactiveCustomerDTO> findInactiveCustomers(@Param("cutoff") LocalDate cutoff);
 	
+	@Query("""
+		    SELECT 
+		        YEAR(u.createdAt) * 100 + MONTH(u.createdAt),
+		        COUNT(u)
+		    FROM User u
+		    WHERE u.createdAt BETWEEN :start AND :end
+		    GROUP BY YEAR(u.createdAt), MONTH(u.createdAt)
+		    ORDER BY YEAR(u.createdAt), MONTH(u.createdAt)
+		""")
+		List<Object[]> rawUserSignups(@Param("start") OffsetDateTime start, @Param("end") OffsetDateTime end);
 }

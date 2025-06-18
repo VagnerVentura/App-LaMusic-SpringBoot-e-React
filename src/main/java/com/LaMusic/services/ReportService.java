@@ -3,11 +3,15 @@ package com.LaMusic.services;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.OffsetDateTime;
 import java.time.YearMonth;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,6 +22,7 @@ import com.LaMusic.dto.GrowthDTO;
 import com.LaMusic.dto.InactiveCustomerDTO;
 import com.LaMusic.dto.LowStockProductDTO;
 import com.LaMusic.dto.MonthlyRevenueProjectionDTO;
+import com.LaMusic.dto.MonthlyUserSignupDTO;
 import com.LaMusic.dto.ReorderSuggestionDTO;
 import com.LaMusic.dto.SalePerDayDTO;
 import com.LaMusic.dto.SalesComparisonDTO;
@@ -177,6 +182,25 @@ public class ReportService {
 	    return userRepository.findInactiveCustomers(cutoffDate);
 	}
 	
-	
+	public List<MonthlyUserSignupDTO> getMonthlyUserSignups(LocalDate start, LocalDate end) {
+	    // Converte LocalDate para OffsetDateTime no fuso UTC
+	    OffsetDateTime startDateTime = start.atStartOfDay().atOffset(ZoneOffset.UTC);
+	    OffsetDateTime endDateTime = end.atTime(LocalTime.MAX).atOffset(ZoneOffset.UTC);
+
+	    List<Object[]> rawData = userRepository.rawUserSignups(startDateTime, endDateTime);
+
+	    return rawData.stream()
+	        .map(obj -> {
+	            Integer yearMonth = (Integer) obj[0];
+	            Long count = (Long) obj[1];
+
+	            int year = yearMonth / 100;
+	            int month = yearMonth % 100;
+
+	            return new MonthlyUserSignupDTO(YearMonth.of(year, month), count);
+	        })
+	        .collect(Collectors.toList());
+	}
+
 	
 }
