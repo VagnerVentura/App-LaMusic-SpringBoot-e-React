@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.LaMusic.dto.BestSellingProductDTO;
 import com.LaMusic.dto.CategoryTrendDTO;
+import com.LaMusic.dto.InactiveCustomerDTO;
 import com.LaMusic.dto.LowStockProductDTO;
 import com.LaMusic.dto.MonthlyRevenueProjectionDTO;
 import com.LaMusic.dto.ReorderSuggestionDTO;
@@ -117,5 +118,15 @@ public class ReportController {
 	) {
 	    return ResponseEntity.ok(reportService.getRevenueProjection(monthsBack, monthsAhead));
 	}
+
+	
+	// lista usuários que não fazem pedidos há mais de X meses.
+	@GetMapping("/clientes-inativos")
+	public ResponseEntity<List<InactiveCustomerDTO>> getInactiveCustomers(
+	        @RequestParam(defaultValue = "6") int months
+	) {
+	    return ResponseEntity.ok(reportService.getInactiveCustomers(months));
+	}
+
 	
 }

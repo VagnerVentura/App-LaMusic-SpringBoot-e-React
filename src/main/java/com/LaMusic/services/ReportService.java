@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import com.LaMusic.dto.BestSellingProductDTO;
 import com.LaMusic.dto.CategoryTrendDTO;
 import com.LaMusic.dto.GrowthDTO;
+import com.LaMusic.dto.InactiveCustomerDTO;
 import com.LaMusic.dto.LowStockProductDTO;
 import com.LaMusic.dto.MonthlyRevenueProjectionDTO;
 import com.LaMusic.dto.ReorderSuggestionDTO;
@@ -29,6 +30,7 @@ import com.LaMusic.entity.Order;
 import com.LaMusic.repositories.OrderItemRepository;
 import com.LaMusic.repositories.OrderRepository;
 import com.LaMusic.repositories.ProductRepository;
+import com.LaMusic.repositories.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -44,6 +46,9 @@ public class ReportService {
 	
 	@Autowired
 	private final ProductRepository productRepository;
+	
+	@Autowired
+	private final UserRepository userRepository;
 	
 	public SalesReportDTO generateSalesReport(LocalDate start, LocalDate end){
 		List<Order> orders = orderRepository.findByOrderDateBetween(start,end);
@@ -166,5 +171,12 @@ public class ReportService {
 
 	    return resultado;
 	}
+	
+	public List<InactiveCustomerDTO> getInactiveCustomers(int months) {
+	    LocalDate cutoffDate = LocalDate.now().minusMonths(months);
+	    return userRepository.findInactiveCustomers(cutoffDate);
+	}
+	
+	
 	
 }
