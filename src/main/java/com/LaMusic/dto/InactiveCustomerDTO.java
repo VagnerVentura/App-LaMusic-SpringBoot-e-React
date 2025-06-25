@@ -13,4 +13,5 @@ public class InactiveCustomerDTO {
     private String name;
     private String email;
     private LocalDate lastOrderDate;
+    private BigDecimal totalSpent;
 }

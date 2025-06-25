@@ -16,17 +16,22 @@ import com.LaMusic.entity.User;
 public interface UserRepository extends JpaRepository<User, UUID> {
 	Optional<User> findByEmail(String email);
 	
-	@Query("""
-		    SELECT new com.LaMusic.dto.InactiveCustomerDTO(
-		        u.id, u.name, u.email, MAX(o.orderDate)
-		    )
-		    FROM User u
-		    LEFT JOIN Order o ON o.user.id = u.id
-		    GROUP BY u.id, u.name, u.email
-		    HAVING MAX(o.orderDate) IS NULL OR MAX(o.orderDate) < :cutoff
-		""")
-		List<InactiveCustomerDTO> findInactiveCustomers(@Param("cutoff") LocalDate cutoff);
-	
+    @Query("""
+        SELECT new com.LaMusic.dto.InactiveCustomerDTO(
+            u.id,
+            u.name,
+            u.email,
+            MAX(o.orderDate),
+            SUM(o.totalAmount)
+        )
+        FROM User u
+        JOIN u.orders o
+        GROUP BY u.id, u.name, u.email
+        HAVING MAX(o.orderDate) < :cutoffDate
+        ORDER BY MAX(o.orderDate) ASC
+    """)
+    List<InactiveCustomerDTO> findInactiveCustomers(@Param("cutoffDate") LocalDate cutoffDate);
+
 	@Query("""
 		    SELECT 
 		        YEAR(u.createdAt) * 100 + MONTH(u.createdAt),
