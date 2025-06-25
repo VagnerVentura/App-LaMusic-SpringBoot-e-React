@@ -23,7 +23,11 @@ import com.LaMusic.dto.SalesComparisonDTO;
 import com.LaMusic.dto.SalesReportDTO;
 import com.LaMusic.dto.SalesSummaryDTO;
 import com.LaMusic.dto.TopCustomerDTO;
+import com.LaMusic.dto.ProductSalesReportDTO;
+import com.LaMusic.dto.ProductSalesReportItemDTO;
+
 import com.LaMusic.services.ReportService;
+
 
 import lombok.AllArgsConstructor;
 
@@ -43,6 +47,15 @@ public class ReportController {
 			){
 		return ResponseEntity.ok(reportService.generateSalesReport(start, end));
 	}
+
+	@GetMapping("/sales-by-product")
+    public ResponseEntity<ProductSalesReportDTO> getSalesByProductReport(
+            @RequestParam("start") @DateTimeFormat(iso= DateTimeFormat.ISO.DATE) LocalDate start,
+            @RequestParam("end") @DateTimeFormat(iso= DateTimeFormat.ISO.DATE) LocalDate end
+    ){
+        return ResponseEntity.ok(reportService.generateProductSalesReport(start, end));
+    }
+
 	
 	//Retornar os produtos mais vendidos com base na quantidade vendida, em ordem decrescente, dentro de um intervalo de datas.
 	@GetMapping("/best-selling-products")
