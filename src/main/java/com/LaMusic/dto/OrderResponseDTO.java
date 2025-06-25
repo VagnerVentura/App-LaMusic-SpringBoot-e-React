@@ -1,13 +1,13 @@
 package com.LaMusic.dto;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
 public record OrderResponseDTO(
     UUID orderId,
-    LocalDateTime orderDate,
+    LocalDate orderDate,
     BigDecimal totalAmount,
     OrderAddressDTO shippingAddress,
     OrderAddressDTO billingAddress,

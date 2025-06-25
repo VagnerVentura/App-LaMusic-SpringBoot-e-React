@@ -1,7 +1,7 @@
 package com.LaMusic.services;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -47,7 +47,7 @@ public class OrderService {
 
         Order order = new Order();
         order.setUser(cart.getUser());
-        order.setOrderDate(LocalDateTime.now());
+        order.setOrderDate(LocalDate.now());
         order.setShippingAddress(shippingOrderAddress);
         order.setBillingAddress(billingOrderAddress);
 

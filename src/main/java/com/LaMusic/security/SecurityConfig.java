@@ -32,7 +32,7 @@ public class SecurityConfig {
 //                .requestMatchers("categories/admin/**").hasRole("ADMIN")
 
                 // Endpoints de cliente logado
-                .requestMatchers("/client/**").hasRole("USER")
+//                .requestMatchers("/client/**").hasRole("USER")
 
                 // Qualquer outra requisição precisa de autenticação
                 .anyRequest().permitAll()

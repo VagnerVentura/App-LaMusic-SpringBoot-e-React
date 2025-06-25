@@ -1,14 +1,15 @@
 package com.LaMusic.entity;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
 
 import com.LaMusic.util.Auditable;
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
@@ -28,7 +29,7 @@ import lombok.Setter;
 @Setter
 @Entity
 @Table(name = "orders")
-public class Order extends Auditable {
+public class Order {
 
 	@Id
 	@GeneratedValue
@@ -42,6 +43,9 @@ public class Order extends Auditable {
 	@JoinColumn(name ="coupon_id")
 	private Coupon coupon;
 	
+	@Column(name = "created_at",updatable = false)
+    protected LocalDate createdAt;
+
 	@ManyToOne
 	@JoinColumn(name = "shipping_address_id")
 	private OrderAddress shippingAddress;
@@ -56,7 +60,7 @@ public class Order extends Auditable {
 	@OneToOne(mappedBy = "order", cascade = CascadeType.ALL)
 	private Payment payment;
 	
-	private LocalDateTime orderDate;
+	private LocalDate orderDate;
 	
 	private BigDecimal totalAmount;
 	
