@@ -79,6 +79,19 @@ public class ReportService {
 		
 		return new SalesReportDTO(totalOrders, totalRevenue, averageTicket, chart);
 	}
+	    public ProductSalesReportDTO generateProductSalesReport(LocalDate start, LocalDate end) {
+        List<ProductSalesReportItemDTO> items = orderItemRepository.findProductSalesReportItems(start, end);
+
+        BigDecimal totalRevenue = items.stream()
+            .map(ProductSalesReportItemDTO::getTotalRevenue)
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        Long totalQuantitySold = items.stream()
+            .mapToLong(ProductSalesReportItemDTO::getQuantitySold)
+            .sum();
+
+        return new ProductSalesReportDTO(items, totalQuantitySold, totalRevenue);
+    }
 	
 	public List<BestSellingProductDTO> getBestSellingProducts(LocalDate start, LocalDate end){
 		return orderItemRepository.findBestSellingProducts(start, end);
