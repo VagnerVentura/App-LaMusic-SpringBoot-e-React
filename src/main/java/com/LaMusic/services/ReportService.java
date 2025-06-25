@@ -23,6 +23,8 @@ import com.LaMusic.dto.InactiveCustomerDTO;
 import com.LaMusic.dto.LowStockProductDTO;
 import com.LaMusic.dto.MonthlyRevenueProjectionDTO;
 import com.LaMusic.dto.MonthlyUserSignupDTO;
+import com.LaMusic.dto.ProductSalesReportDTO;
+import com.LaMusic.dto.ProductSalesReportItemDTO;
 import com.LaMusic.dto.ReorderSuggestionDTO;
 import com.LaMusic.dto.SalePerDayDTO;
 import com.LaMusic.dto.SalesComparisonDTO;
