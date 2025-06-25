@@ -27,13 +27,13 @@ public class ClientController {
     private final UserRepository userRepository;
 
 //    @PreAuthorize("hasRole('ROLE_USER')")
-//    @GetMapping("/me")
-//    public UserDTO getMyProfile(@AuthenticationPrincipal UserDetails userDetails) {
-//        User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow();
-//        return userService.findUserDTOById(user.getId());
-//    }
+    @GetMapping("/me")
+    public UserDTO getMyProfile(@AuthenticationPrincipal UserDetails userDetails) {
+        User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow();
+        return userService.findUserDTOById(user.getId());
+    }
 //    
-    @PreAuthorize("hasRole('ROLE_USER')")
+//    @PreAuthorize("hasRole('ROLE_USER')")
     @PutMapping("/me")
     public UserDTO updateMyProfile(@AuthenticationPrincipal UserDetails userDetails,
                                    @RequestBody UpdateUserRequest request) {
