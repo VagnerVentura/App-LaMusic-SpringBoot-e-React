@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.LaMusic.dto.BestSellingProductDTO;
+import com.LaMusic.dto.BestSellingProductsReportDTO;
 import com.LaMusic.dto.CategoryTrendDTO;
 import com.LaMusic.dto.InactiveCustomerDTO;
 import com.LaMusic.dto.LowStockProductDTO;
@@ -59,13 +60,13 @@ public class ReportController {
 
 	
 	//Retornar os produtos mais vendidos com base na quantidade vendida, em ordem decrescente, dentro de um intervalo de datas.
-	@GetMapping("/best-selling-products")
-	public ResponseEntity<List<BestSellingProductDTO>> getBestSellingProducts(
-			@RequestParam("start") @DateTimeFormat(iso= DateTimeFormat.ISO.DATE) LocalDate start,
-			@RequestParam("end") @DateTimeFormat(iso= DateTimeFormat.ISO.DATE) LocalDate end
-			) {
-		return ResponseEntity.ok(reportService.getBestSellingProducts(start, end));
-	}
+    @GetMapping("/best-selling-products")
+    public ResponseEntity<BestSellingProductsReportDTO> getBestSellingProducts(
+            @RequestParam("start") @DateTimeFormat(iso= DateTimeFormat.ISO.DATE) LocalDate start,
+            @RequestParam("end") @DateTimeFormat(iso= DateTimeFormat.ISO.DATE) LocalDate end
+            ) {
+        return ResponseEntity.ok(reportService.getBestSellingProducts(start, end));
+    }
 	
 	//Retornar produtos com estoque atual menor ou igual a um limite definido (ex: 5 unidades).
 	@GetMapping("/low-stock-products")

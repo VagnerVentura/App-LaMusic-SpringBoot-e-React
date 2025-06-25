@@ -32,6 +32,27 @@ public interface OrderItemRepository extends JpaRepository<OrderItem, UUID> {
                 @Param("end") LocalDate end
             );
 
+          @Query("""
+        SELECT new com.LaMusic.dto.BestSellingProductDTO(
+            oi.product.id,
+            oi.product.name,
+            SUM(oi.quantity),
+            SUM(oi.totalPrice)
+        )
+        FROM OrderItem oi
+        JOIN oi.order o
+        WHERE o.orderDate BETWEEN :start AND :end
+        AND o.status IN :statuses
+        GROUP BY oi.product.id, oi.product.name
+        ORDER BY SUM(oi.quantity) DESC
+    """)
+    List<BestSellingProductDTO> findBestSellingProductsByStatus(
+        @Param("start") LocalDate start,
+        @Param("end") LocalDate end,
+        @Param("statuses") List<String> statuses
+    );
+       
+
      @Query("""
         SELECT new com.LaMusic.dto.ProductSalesReportItemDTO(
             oi.product.id,

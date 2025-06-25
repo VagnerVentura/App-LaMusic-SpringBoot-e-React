@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.LaMusic.dto.BestSellingProductDTO;
+import com.LaMusic.dto.BestSellingProductsReportDTO;
 import com.LaMusic.dto.CategoryTrendDTO;
 import com.LaMusic.dto.GrowthDTO;
 import com.LaMusic.dto.InactiveCustomerDTO;
@@ -119,9 +120,15 @@ public class ReportService {
         return new ProductSalesReportDTO(items, totalQuantitySold, totalRevenue);
     }
 	
-	public List<BestSellingProductDTO> getBestSellingProducts(LocalDate start, LocalDate end){
-		return orderItemRepository.findBestSellingProducts(start, end);
-	}
+    public BestSellingProductsReportDTO getBestSellingProducts(LocalDate start, LocalDate end){
+        List<String> completedStatuses = List.of("COMPLETED", "SHIPPED", "DELIVERED");
+        List<String> pendingStatuses = List.of("PENDING");
+
+        List<BestSellingProductDTO> completedProducts = orderItemRepository.findBestSellingProductsByStatus(start, end, completedStatuses);
+        List<BestSellingProductDTO> pendingProducts = orderItemRepository.findBestSellingProductsByStatus(start, end, pendingStatuses);
+
+        return new BestSellingProductsReportDTO(completedProducts, pendingProducts);
+    }
 	
 	public List<LowStockProductDTO> getLowStockProducts(Integer threslhold){
 		return productRepository.findLowStockProducts(threslhold); 
