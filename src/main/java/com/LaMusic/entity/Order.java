@@ -63,5 +63,7 @@ public class Order {
 	private LocalDate orderDate;
 	
 	private BigDecimal totalAmount;
+
+	private String status;
 	
 }

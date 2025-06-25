@@ -38,6 +38,8 @@ import com.LaMusic.repositories.OrderItemRepository;
 import com.LaMusic.repositories.OrderRepository;
 import com.LaMusic.repositories.ProductRepository;
 import com.LaMusic.repositories.UserRepository;
+import com.LaMusic.dto.AdvancedSalesReportDTO;
+import com.LaMusic.dto.DailySalesStatusDTO;
 
 import lombok.RequiredArgsConstructor;
 
@@ -57,30 +59,52 @@ public class ReportService {
 	@Autowired
 	private final UserRepository userRepository;
 	
-	public SalesReportDTO generateSalesReport(LocalDate start, LocalDate end){
-		List<Order> orders = orderRepository.findByOrderDateBetween(start,end);
-		
-		int totalOrders = orders.size();
-		BigDecimal totalRevenue = orders.stream()
-				.map(Order::getTotalAmount)
-				.reduce(BigDecimal.ZERO, BigDecimal::add);
-		
-		BigDecimal averageTicket = totalOrders > 0
-				?totalRevenue.divide(BigDecimal.valueOf(totalOrders), 2, RoundingMode.HALF_UP)
-				:BigDecimal.ZERO;
-		
-		Map<LocalDate, BigDecimal> dailySales = new TreeMap<>();
-		for(Order order : orders) {
-			LocalDate date = order.getOrderDate();
-			dailySales.put(date, dailySales.getOrDefault(date, BigDecimal.ZERO).add(order.getTotalAmount()));
-		}
-		
-		List<SalePerDayDTO> chart = dailySales.entrySet().stream()
-				.map(e-> new SalePerDayDTO(e.getKey(), e.getValue()))
-				.toList();
-		
-		return new SalesReportDTO(totalOrders, totalRevenue, averageTicket, chart);
-	}
+    public AdvancedSalesReportDTO generateSalesReport(LocalDate start, LocalDate end){
+        List<Order> orders = orderRepository.findByOrderDateBetween(start, end);
+
+        BigDecimal totalCompletedRevenue = BigDecimal.ZERO;
+        int totalCompletedOrders = 0;
+
+        BigDecimal totalPendingRevenue = BigDecimal.ZERO;
+        int totalPendingOrders = 0;
+
+        // Usamos um TreeMap para manter as datas ordenadas automaticamente.
+        Map<LocalDate, DailySalesStatusDTO> dailySales = new TreeMap<>();
+
+        for (Order order : orders) {
+            LocalDate date = order.getOrderDate();
+            // Garante que existe uma entrada para cada dia com pedido.
+            dailySales.putIfAbsent(date, new DailySalesStatusDTO(date));
+            DailySalesStatusDTO dayData = dailySales.get(date);
+
+            // Assumindo que status "completed", "shipped", "delivered" são vendas finalizadas.
+            // Ajuste os status conforme a sua regra de negócio.
+            if ("COMPLETED".equalsIgnoreCase(order.getStatus()) || "SHIPPED".equalsIgnoreCase(order.getStatus()) || "DELIVERED".equalsIgnoreCase(order.getStatus())) {
+                totalCompletedRevenue = totalCompletedRevenue.add(order.getTotalAmount());
+                totalCompletedOrders++;
+                dayData.setCompletedAmount(dayData.getCompletedAmount().add(order.getTotalAmount()));
+            } else { // Todos os outros status (pending, canceled, etc.)
+                totalPendingRevenue = totalPendingRevenue.add(order.getTotalAmount());
+                totalPendingOrders++;
+                dayData.setPendingAmount(dayData.getPendingAmount().add(order.getTotalAmount()));
+            }
+        }
+
+        BigDecimal averageCompletedTicket = totalCompletedOrders > 0
+                ? totalCompletedRevenue.divide(BigDecimal.valueOf(totalCompletedOrders), 2, RoundingMode.HALF_UP)
+                : BigDecimal.ZERO;
+
+        List<DailySalesStatusDTO> chart = new ArrayList<>(dailySales.values());
+
+        return new AdvancedSalesReportDTO(
+                totalCompletedOrders,
+                totalCompletedRevenue,
+                averageCompletedTicket,
+                totalPendingOrders,
+                totalPendingRevenue,
+                chart
+        );
+    }
 	    public ProductSalesReportDTO generateProductSalesReport(LocalDate start, LocalDate end) {
         List<ProductSalesReportItemDTO> items = orderItemRepository.findProductSalesReportItems(start, end);
 
