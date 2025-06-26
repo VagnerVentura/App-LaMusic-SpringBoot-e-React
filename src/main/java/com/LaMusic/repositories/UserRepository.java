@@ -21,14 +21,14 @@ public interface UserRepository extends JpaRepository<User, UUID> {
             u.id,
             u.name,
             u.email,
-            MAX(o.orderDate),
+            MAX(o.createdAt),
             SUM(o.totalAmount)
         )
         FROM User u
         JOIN u.orders o
         GROUP BY u.id, u.name, u.email
-        HAVING MAX(o.orderDate) < :cutoffDate
-        ORDER BY MAX(o.orderDate) ASC
+        HAVING MAX(o.createdAt) < :cutoffDate
+        ORDER BY MAX(o.createdAt) ASC
     """)
     List<InactiveCustomerDTO> findInactiveCustomers(@Param("cutoffDate") LocalDate cutoffDate);
 
