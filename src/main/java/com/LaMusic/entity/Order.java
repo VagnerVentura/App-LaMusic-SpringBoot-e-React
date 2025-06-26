@@ -60,8 +60,6 @@ public class Order {
 	@OneToOne(mappedBy = "order", cascade = CascadeType.ALL)
 	private Payment payment;
 	
-	private LocalDate orderDate;
-	
 	private BigDecimal totalAmount;
 
 	private String status;

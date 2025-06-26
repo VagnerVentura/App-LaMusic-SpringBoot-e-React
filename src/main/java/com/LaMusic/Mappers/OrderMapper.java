@@ -47,7 +47,7 @@ public class OrderMapper {
 
 	    return new OrderResponseDTO(
 	        order.getId(),
-	        order.getOrderDate(),
+	        order.getCreatedAt(),
 	        order.getTotalAmount(),
 	        shipping,
 	        billing,

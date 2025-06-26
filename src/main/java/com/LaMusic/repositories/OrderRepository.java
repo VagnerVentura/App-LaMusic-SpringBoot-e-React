@@ -17,9 +17,10 @@ import com.LaMusic.entity.Order;
 
 public interface OrderRepository extends JpaRepository<Order, UUID> {
 
-	List<Order> findByUserId(UUID userId);
-	
-    List<Order> findByOrderDateBetween(LocalDate start, LocalDate end);
+    List<Order> findByUserId(UUID userId);
+    
+    // Este método está correto e é usado pelo endpoint /reports/sales
+    List<Order> findBycreatedAtBetween(LocalDate start, LocalDate end);
 
     @Query("""
             SELECT new com.LaMusic.dto.SalesSummaryDTO(
@@ -28,38 +29,42 @@ public interface OrderRepository extends JpaRepository<Order, UUID> {
                 CASE WHEN COUNT(o) = 0 THEN 0 ELSE SUM(o.totalAmount) / COUNT(o) END
             )
             FROM Order o
-            WHERE o.createdAt BETWEEN :start AND :end
+            WHERE o.createdAt BETWEEN :start AND :end 
+            AND o.status IN ('COMPLETED', 'SHIPPED', 'DELIVERED')
         """)
     SalesSummaryDTO getSalesSummary(
-    		@Param("start") LocalDate start,
-    		@Param("end") LocalDate end
-    		);
+            @Param("start") LocalDate start,
+            @Param("end") LocalDate end
+            );
     
-    
-    @Query("""
-    	    SELECT new com.LaMusic.dto.SalesSummaryRawDTO(
-    	        COALESCE(SUM(o.totalAmount), 0),
-    	        COUNT(o)
-    	    )
-    	    FROM Order o
-    	    WHERE o.createdAt BETWEEN :start AND :end
-    	""")
-	SalesSummaryRawDTO getRawSalesSummary(
-    	    @Param("start") LocalDate start,
-    	    @Param("end") LocalDate end
-    	);
     
     
     @Query("""
-    	    SELECT new com.LaMusic.dto.SalesPeriodDTO(
-    	        COALESCE(SUM(o.totalAmount), 0),
-    	        COUNT(o),
-    	        CASE WHEN COUNT(o) = 0 THEN 0 ELSE SUM(o.totalAmount) / COUNT(o) END
-    	    )
-    	    FROM Order o
-    	    WHERE o.createdAt BETWEEN :start AND :end
-    	""")
-    	SalesPeriodDTO getSalesPeriodSummary(@Param("start") LocalDate start, @Param("end") LocalDate end);
+            SELECT new com.LaMusic.dto.SalesSummaryRawDTO(
+                COALESCE(SUM(o.totalAmount), 0),
+                COUNT(o)
+            )
+            FROM Order o
+            WHERE o.createdAt BETWEEN :start AND :end
+            AND o.status IN ('COMPLETED', 'SHIPPED', 'DELIVERED') 
+        """)
+    SalesSummaryRawDTO getRawSalesSummary(
+            @Param("start") LocalDate start,
+            @Param("end") LocalDate end
+        );
+    
+    
+    @Query("""
+            SELECT new com.LaMusic.dto.SalesPeriodDTO(
+                COALESCE(SUM(o.totalAmount), 0),
+                COUNT(o),
+                CASE WHEN COUNT(o) = 0 THEN 0 ELSE SUM(o.totalAmount) / COUNT(o) END
+            )
+            FROM Order o
+            WHERE o.createdAt BETWEEN :start AND :end
+            AND o.status IN ('COMPLETED', 'SHIPPED', 'DELIVERED')
+        """)
+        SalesPeriodDTO getSalesPeriodSummary(@Param("start") LocalDate start, @Param("end") LocalDate end);
     
     
     @Query("""
@@ -72,6 +77,7 @@ public interface OrderRepository extends JpaRepository<Order, UUID> {
             )
             FROM Order o
             WHERE o.createdAt BETWEEN :start AND :end
+            AND o.status IN ('COMPLETED', 'SHIPPED', 'DELIVERED')
             GROUP BY o.user.id, o.user.name, o.user.email
             ORDER BY SUM(o.totalAmount) DESC
         """)
@@ -81,19 +87,20 @@ public interface OrderRepository extends JpaRepository<Order, UUID> {
         );
     
     @Query("""
-    	    SELECT new com.LaMusic.dto.MonthlyRevenueProjectionDTO(
-    	        EXTRACT(YEAR FROM o.orderDate) * 100 + EXTRACT(MONTH FROM o.orderDate),
-    	        SUM(o.totalAmount),
-    	        false
-    	    )
-    	    FROM Order o
-    	    WHERE o.orderDate BETWEEN :start AND :end
-    	    GROUP BY EXTRACT(YEAR FROM o.orderDate), EXTRACT(MONTH FROM o.orderDate)
-    	    ORDER BY EXTRACT(YEAR FROM o.orderDate), EXTRACT(MONTH FROM o.orderDate)
-    	""")
-    	List<MonthlyRevenueProjectionDTO> getMonthlyRevenues(
-    	    @Param("start") LocalDate start,
-    	    @Param("end") LocalDate end
-    	);
+            SELECT new com.LaMusic.dto.MonthlyRevenueProjectionDTO(
+                EXTRACT(YEAR FROM o.createdAt) * 100 + EXTRACT(MONTH FROM o.createdAt),
+                SUM(o.totalAmount),
+                false
+            )
+            FROM Order o
+            WHERE o.createdAt BETWEEN :start AND :end
+            AND o.status IN ('COMPLETED', 'SHIPPED', 'DELIVERED')
+            GROUP BY EXTRACT(YEAR FROM o.createdAt), EXTRACT(MONTH FROM o.createdAt)
+            ORDER BY EXTRACT(YEAR FROM o.createdAt), EXTRACT(MONTH FROM o.createdAt)
+        """)
+        List<MonthlyRevenueProjectionDTO> getMonthlyRevenues(
+            @Param("start") LocalDate start,
+            @Param("end") LocalDate end
+        );
     
 }

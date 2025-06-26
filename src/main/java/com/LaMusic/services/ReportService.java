@@ -61,7 +61,7 @@ public class ReportService {
 	private final UserRepository userRepository;
 	
     public AdvancedSalesReportDTO generateSalesReport(LocalDate start, LocalDate end){
-        List<Order> orders = orderRepository.findByOrderDateBetween(start, end);
+        List<Order> orders = orderRepository.findByCreatedAtBetween(start, end);
 
         BigDecimal totalCompletedRevenue = BigDecimal.ZERO;
         int totalCompletedOrders = 0;
@@ -73,7 +73,7 @@ public class ReportService {
         Map<LocalDate, DailySalesStatusDTO> dailySales = new TreeMap<>();
 
         for (Order order : orders) {
-            LocalDate date = order.getOrderDate();
+            LocalDate date = order.getCreatedAt();
             // Garante que existe uma entrada para cada dia com pedido.
             dailySales.putIfAbsent(date, new DailySalesStatusDTO(date));
             DailySalesStatusDTO dayData = dailySales.get(date);

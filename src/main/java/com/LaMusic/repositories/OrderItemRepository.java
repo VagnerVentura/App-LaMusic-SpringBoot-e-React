@@ -26,7 +26,7 @@ public interface OrderItemRepository extends JpaRepository<OrderItem, UUID> {
         )
         FROM OrderItem oi
         JOIN oi.order o
-        WHERE o.orderDate BETWEEN :start AND :end
+        WHERE o.createdAt BETWEEN :start AND :end
         AND o.status IN :statuses
         GROUP BY oi.product.id, oi.product.name
         ORDER BY SUM(oi.quantity) DESC
@@ -47,7 +47,7 @@ public interface OrderItemRepository extends JpaRepository<OrderItem, UUID> {
         )
         FROM OrderItem oi
         JOIN oi.order o
-        WHERE o.orderDate BETWEEN :start AND :end
+        WHERE o.createdAt BETWEEN :start AND :end
         GROUP BY oi.product.id, oi.product.name
         ORDER BY SUM(oi.totalPrice) DESC
     """)

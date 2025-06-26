@@ -47,7 +47,7 @@ public class OrderService {
 
         Order order = new Order();
         order.setUser(cart.getUser());
-        order.setOrderDate(LocalDate.now());
+        order.setCreatedAt(LocalDate.now());
         order.setShippingAddress(shippingOrderAddress);
         order.setBillingAddress(billingOrderAddress);
 
