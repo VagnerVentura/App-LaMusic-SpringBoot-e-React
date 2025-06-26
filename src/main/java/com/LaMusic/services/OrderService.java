@@ -17,12 +17,12 @@ import com.LaMusic.entity.Cart;
 import com.LaMusic.entity.Order;
 import com.LaMusic.entity.OrderAddress;
 import com.LaMusic.entity.OrderItem;
+import com.LaMusic.entity.Payment;
 import com.LaMusic.entity.Product;
+import com.LaMusic.repositories.OrderAddressRepository;
 import com.LaMusic.repositories.OrderRepository;
 
 import jakarta.transaction.Transactional;
-
-import com.LaMusic.repositories.OrderAddressRepository;
 
 @Service
 public class OrderService {
@@ -42,6 +42,9 @@ public class OrderService {
     @Autowired
     private AddressService addressService;
 
+    @Autowired
+    private PaymentService paymentService;
+    
     @Transactional
     public OrderResponseDTO placeOrder(UUID userId, UUID shippingAddressId, UUID billingAddressId) {
         Cart cart = cartService.findCartByUserId(userId);
@@ -112,6 +115,18 @@ public class OrderService {
         // Salvar pedido e deletar carrinho
         orderRepository.saveAndFlush(order);
         cart.getItems().clear();
+        
+     // Criar pagamento inicial vinculado ao pedido
+        Payment payment = Payment.builder()
+        	    .order(order)
+        	    .amount(order.getTotalAmount())
+        	    .method("pix") // ou "unpaid" – o método pode ser definido depois pelo usuário
+        	    .status("pending")
+        	    .createdAt(OffsetDateTime.now())
+        	    .build();
+        
+        paymentService.create(payment);        
+        
         cartService.deleteCart(cart);
 
         return OrderMapper.mapToDto(order);
@@ -141,4 +156,9 @@ public class OrderService {
         String random = UUID.randomUUID().toString().substring(0, 6).toUpperCase();
         return "ORD-" + date + "-" + random;
     }
+
+	public Order findOrderByIdAndUser(UUID orderId, UUID userId) {
+		return  orderRepository.findByIdAndUserId(orderId, userId)
+		  .orElseThrow(() -> new RuntimeException("Pedido não encontrado ou não pertence ao usuário."));
+	}
 }

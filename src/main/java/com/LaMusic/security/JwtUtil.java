@@ -58,7 +58,7 @@ public class JwtUtil {
         String role = userDetails.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .findFirst()
-                .orElse("ROLE_USER");
+                .orElse("ROLE_CUSTOMER");
 
         claims.put("role", role);
 

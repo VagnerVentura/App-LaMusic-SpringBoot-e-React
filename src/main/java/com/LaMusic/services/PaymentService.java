@@ -58,4 +58,8 @@ public class PaymentService {
     public void delete(UUID id) {
         repository.deleteById(id);
     }
+
+	public void create(Payment payment) {
+		repository.save(payment);		
+	}
 }
