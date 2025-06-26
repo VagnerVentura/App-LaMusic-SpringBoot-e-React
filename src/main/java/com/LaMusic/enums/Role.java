@@ -1,6 +1,7 @@
 package com.LaMusic.enums;
 
 public enum Role {
-	 USER,
+    USER,
+	 CUSTOMER,
     ADMIN
 }
