@@ -19,8 +19,8 @@ public interface OrderRepository extends JpaRepository<Order, UUID> {
 
     List<Order> findByUserId(UUID userId);
     
-    // Este método está correto e é usado pelo endpoint /reports/sales
-    List<Order> findBycreatedAtBetween(LocalDate start, LocalDate end);
+
+    List<Order> findByCreatedAtBetween(LocalDate start, LocalDate end);
 
     @Query("""
             SELECT new com.LaMusic.dto.SalesSummaryDTO(
