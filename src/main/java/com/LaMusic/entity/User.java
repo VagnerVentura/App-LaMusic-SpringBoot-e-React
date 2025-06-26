@@ -46,7 +46,6 @@ public class User {
 
     private String phone;
     
-    @Enumerated(EnumType.STRING)
     private Role role;
     
     private Boolean email_verified;

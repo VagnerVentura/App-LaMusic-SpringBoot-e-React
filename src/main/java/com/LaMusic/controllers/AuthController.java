@@ -45,7 +45,7 @@ public class AuthController {
 
     @PostMapping("/register")
     public AuthResponse registerCliente(@RequestBody RegisterRequest request) {
-        return registerUser(request, Role.USER);
+        return registerUser(request, Role.CUSTOMER);
     }
 
     @PostMapping("/register-admin")

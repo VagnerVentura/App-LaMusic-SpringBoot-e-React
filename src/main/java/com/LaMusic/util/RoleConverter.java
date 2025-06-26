@@ -1,8 +1,8 @@
-package com.LaMusic.enums;
+package com.LaMusic.util;
 
+import com.LaMusic.enums.Role;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
-import java.util.stream.Stream;
 
 @Converter(autoApply = true)
 public class RoleConverter implements AttributeConverter<Role, String> {
@@ -12,19 +12,26 @@ public class RoleConverter implements AttributeConverter<Role, String> {
         if (role == null) {
             return null;
         }
-        // Garante que o valor salvo no banco seja sempre minúsculo (ex: "customer", "admin")
+        // Padroniza a escrita no banco para sempre ser minúscula (ex: "customer", "admin")
         return role.name().toLowerCase();
     }
 
     @Override
     public Role convertToEntityAttribute(String dbData) {
-        if (dbData == null) {
+        if (dbData == null || dbData.trim().isEmpty()) {
             return null;
         }
-        // Converte o valor do banco (minúsculo) para o Enum (maiúsculo)
-        return Stream.of(Role.values())
-                .filter(r -> r.name().equalsIgnoreCase(dbData))
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Valor desconhecido para Role: " + dbData));
+
+        // Converte o valor do banco (seja ele qual for) para o Enum correto
+        switch (dbData.toLowerCase()) {
+            case "customer":
+            case "user": // CORREÇÃO: Adicionado para tratar o legado "USER" como "CUSTOMER"
+                return Role.CUSTOMER;
+            case "admin":
+                return Role.ADMIN;
+            default:
+                // Lança uma exceção se encontrar um valor realmente desconhecido
+                throw new IllegalArgumentException("Valor desconhecido para Role no banco de dados: " + dbData);
+        }
     }
 }
