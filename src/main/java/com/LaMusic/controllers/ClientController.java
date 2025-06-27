@@ -41,7 +41,7 @@ public class ClientController {
         return userService.update(user.getId(), request);
     }
 
-    @PreAuthorize("hasRole('CUSTOMER')") 
+    @PreAuthorize("hasRole('CUSTOMER')")
     @DeleteMapping("/me")
     public void deleteMyAccount(@AuthenticationPrincipal UserDetails userDetails) {
         User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow();

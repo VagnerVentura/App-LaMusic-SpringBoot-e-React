@@ -57,9 +57,17 @@ public class Order {
 	@OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
 	private List<OrderItem> items;
 	
+	@Column(name = "order_number", nullable = false, unique = true)
+	private String orderNumber;
+	
 	@OneToOne(mappedBy = "order", cascade = CascadeType.ALL)
 	private Payment payment;
 	
+	private LocalDate orderDate;
+	
+	@Column(name = "subtotal", nullable = false)
+	private BigDecimal subtotal;
+
 	private BigDecimal totalAmount;
 
 	private String status;

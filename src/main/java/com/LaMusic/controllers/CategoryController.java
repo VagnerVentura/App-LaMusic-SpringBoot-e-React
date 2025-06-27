@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.LaMusic.dto.ProductResponseDTO;
 import com.LaMusic.entity.Category;
 import com.LaMusic.entity.Product;
 import com.LaMusic.services.CategoryService;
@@ -53,9 +54,8 @@ public class CategoryController {
     }
     
     @GetMapping("/{id}/products")
-    public ResponseEntity<List<Product>> getProductsByCategoryId(@PathVariable UUID id) {
-        List<Product> products = categoryService.getProductsByCategoryId(id);
-        return ResponseEntity.ok(products);
+    public ResponseEntity<List<ProductResponseDTO>> getProductsByCategoryId(@PathVariable UUID id) {
+        return ResponseEntity.ok(categoryService.getProductsByCategoryId(id));
     }
 	
 }

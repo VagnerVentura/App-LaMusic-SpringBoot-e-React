@@ -2,11 +2,15 @@ package com.LaMusic.services;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.LaMusic.dto.ProductResponseDTO;
 import com.LaMusic.entity.Category;
 import com.LaMusic.entity.Product;
+import com.LaMusic.entity.ProductImage;
 import com.LaMusic.repositories.CategoryRepository;
 
 import lombok.AllArgsConstructor;
@@ -15,6 +19,7 @@ import lombok.AllArgsConstructor;
 @Service
 public class CategoryService {
 
+	@Autowired
 	CategoryRepository categoryRepository;
 	
 	public List<Category> listCategories(){
@@ -44,9 +49,32 @@ public class CategoryService {
 		return categoryRepository.findAllById(list);
 	}
 	
-	public List<Product> getProductsByCategoryId(UUID categoryId) {
-	        Category category = categoryRepository.findById(categoryId)
-	            .orElseThrow(() -> new RuntimeException("Categoria não encontrada com ID: " + categoryId));
-	        return category.getProducts();
+	public List<ProductResponseDTO> getProductsByCategoryId(UUID categoryId) {
+	    Category category = categoryRepository.findById(categoryId)
+	        .orElseThrow(() -> new RuntimeException("Categoria não encontrada"));
+
+	    List<Product> products = category.getProducts();
+
+	    return products.stream().map(product -> {
+	        ProductResponseDTO dto = new ProductResponseDTO();
+	        dto.setId(product.getId());
+	        dto.setName(product.getName());
+	        dto.setDescription(product.getDescription());
+	        dto.setSlug(product.getSlug());
+	        dto.setPrice(product.getPrice());
+
+	        // Buscar imagem principal
+	        String imageUrl = product.getImages() != null
+	            ? product.getImages().stream()
+	                .filter(img -> Boolean.TRUE.equals(img.getIsPrimary()))
+	                .map(ProductImage::getUrl)
+	                .findFirst()
+	                .orElse(null)
+	            : null;
+
+	        dto.setImageUrl(imageUrl);
+
+	        return dto;
+	    }).collect(Collectors.toList());
 	}
 }

@@ -8,52 +8,48 @@ import com.LaMusic.dto.OrderAddressDTO;
 import com.LaMusic.dto.OrderItemResponseDTO;
 import com.LaMusic.dto.OrderResponseDTO;
 import com.LaMusic.entity.Order;
+import com.LaMusic.entity.OrderAddress;
 
 @Component
 public class OrderMapper {
 
-	public static OrderResponseDTO mapToDto(Order order) {
-	    List<OrderItemResponseDTO> items = order.getItems().stream()
-	        .map(item -> new OrderItemResponseDTO(
-	            item.getProduct().getId(),
-	            item.getProduct().getName(),
-	            item.getQuantity(),
-	            item.getUnitPrice()
-	        )).toList();
+    public static OrderResponseDTO mapToDto(Order order) {
+        List<OrderItemResponseDTO> items = order.getItems().stream()
+            .map(item -> new OrderItemResponseDTO(
+                item.getProduct().getId(),
+                item.getProduct().getName(),
+                item.getQuantity(),
+                item.getUnitPrice()
+            )).toList();
 
-	    OrderAddressDTO shipping = new OrderAddressDTO(
-	        order.getShippingAddress().getRecipientName(),
-	        order.getShippingAddress().getStreet(),
-	        order.getShippingAddress().getNumber(),
-	        order.getShippingAddress().getComplement(),
-	        order.getShippingAddress().getNeighborhood(),
-	        order.getShippingAddress().getCity(),
-	        order.getShippingAddress().getState(),
-	        order.getShippingAddress().getZipCode(),
-	        order.getShippingAddress().getCountry()
-	    );
+        OrderAddressDTO shipping = mapToAddressDto(order.getShippingAddress());
+        OrderAddressDTO billing = mapToAddressDto(order.getBillingAddress());
 
-	    OrderAddressDTO billing = new OrderAddressDTO(
-	        order.getBillingAddress().getRecipientName(),
-	        order.getBillingAddress().getStreet(),
-	        order.getBillingAddress().getNumber(),
-	        order.getBillingAddress().getComplement(),
-	        order.getBillingAddress().getNeighborhood(),
-	        order.getBillingAddress().getCity(),
-	        order.getBillingAddress().getState(),
-	        order.getBillingAddress().getZipCode(),
-	        order.getBillingAddress().getCountry()
-	    );
+        return new OrderResponseDTO(
+            order.getId(),
+            order.getOrderDate(),
+            order.getTotalAmount(),
+            shipping,
+            billing,
+            items
+        );
+    }
 
-	    return new OrderResponseDTO(
-	        order.getId(),
-	        order.getCreatedAt(),
-	        order.getTotalAmount(),
-	        shipping,
-	        billing,
-	        items
-	    );
-	}
+    private static OrderAddressDTO mapToAddressDto(OrderAddress address) {
+        if (address == null) {
+            return null;
+        }
 
-	
+        return new OrderAddressDTO(
+            address.getRecipientName(),
+            address.getStreet(),
+            address.getNumber(),
+            address.getComplement(),
+            address.getNeighborhood(),
+            address.getCity(),
+            address.getState(),
+            address.getZipCode(),
+            address.getCountry()
+        );
+    }
 }
