@@ -110,41 +110,26 @@ public class CartService {
     }
 
     @Transactional
-    public Cart removeItemFromCart(UUID userId, UUID productId) {
-        logger.info("removeItemFromCart - Início: userId={}, productId={}", userId, productId);
+    public Cart removeItemFromCart(UUID userId, UUID cartItemId) {
+        logger.info("removeItemFromCart - Início: userId={}, cartItemId={}", userId, cartItemId);
+
         Cart cart = findCartByUserId(userId);
         logger.debug("removeItemFromCart - Carrinho encontrado: cartId={}", cart.getId());
 
         CartItem itemToRemove = cart.getItems().stream()
-            .filter(item -> item.getProduct() != null && item.getProduct().getId().equals(productId))
+            .filter(item -> item.getId().equals(cartItemId))
             .findFirst()
-            .orElse(null); 
+            .orElse(null);
 
         if (itemToRemove != null) {
-            logger.info("removeItemFromCart - Removendo CartItem: itemId={}, productId={} do cartId={}", 
-                itemToRemove.getId(), productId, cart.getId());
-            cart.getItems().remove(itemToRemove); 
-            if (itemToRemove.getId() != null) { // Garante que o item existe no banco antes de tentar deletar
-                cartItemRepository.delete(itemToRemove);
-            }
-            logger.debug("removeItemFromCart - CartItem removido da coleção e/ou repositório: itemId={}", itemToRemove.getId());
-            // Salvar o carrinho após a remoção do item para garantir que o estado da coleção seja persistido
-            // e o orphanRemoval (se aplicável) seja acionado corretamente.
-            cart = cartRepository.save(cart);
+            cart.getItems().remove(itemToRemove); // modifica a coleção existente
+            cartItemRepository.delete(itemToRemove); // opcional se orphanRemoval=true
+            logger.info("CartItem removido com sucesso: {}", itemToRemove.getId());
         } else {
-            logger.warn("removeItemFromCart - Item não encontrado no carrinho para remoção: productId={}, cartId={}", 
-                productId, cart.getId());
+            logger.warn("CartItem não encontrado no carrinho: cartItemId={}", cartItemId);
         }
-        
-        // A coleção cart.getItems() já está atualizada. Não é necessário recarregar.
-        if (logger.isDebugEnabled()) {
-            String itemsDetails = cart.getItems().stream()
-                .map(ci -> String.format("Item[id=%s, prodId=%s, qty=%d]", ci.getId(), (ci.getProduct() != null ? ci.getProduct().getId() : "null"), ci.getQuantity()))
-                .collect(Collectors.joining(", "));
-            logger.debug("removeItemFromCart - Itens finais no carrinho: cartId={}, items=[{}]", cart.getId(), itemsDetails);
-        }
-        logger.info("removeItemFromCart - Fim: cartId={}, userId={}", cart.getId(), userId);
-        return cart;
+
+        return cartRepository.save(cart);
     }
 
     @Transactional
@@ -248,4 +233,28 @@ public class CartService {
         cartRepository.delete(cart);
         logger.info("deleteCart - Fim: Carrinho deletado com sucesso: cartId={}", cart.getId());
     }
+    
+    @Transactional
+    public void checkout(UUID userId) {
+        logger.info("checkout - Início: userId={}", userId);
+
+        Cart cart = findCartByUserId(userId);
+
+        if (cart.getItems().isEmpty()) {
+            logger.warn("checkout - Tentativa de finalizar carrinho vazio: cartId={}", cart.getId());
+            throw new IllegalStateException("Não é possível finalizar um carrinho vazio.");
+        }
+
+        // Aqui você pode implementar a lógica de criação de pedido (Order), salvar no banco etc.
+        // Exemplo básico (sem persistência de pedido):
+        logger.info("checkout - Finalizando compra para cartId={} com {} itens.", cart.getId(), cart.getItems().size());
+
+        // Limpa o carrinho após o checkout
+        cartItemRepository.deleteAllInBatch(new ArrayList<>(cart.getItems()));
+        cart.getItems().clear();
+        cartRepository.save(cart);
+
+        logger.info("checkout - Compra finalizada com sucesso: cartId={}, userId={}", cart.getId(), userId);
+    }
+    
 }

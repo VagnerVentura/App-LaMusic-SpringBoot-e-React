@@ -14,7 +14,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.LaMusic.Mappers.CartMapper;
 import com.LaMusic.dto.AddCartDTO;
+import com.LaMusic.dto.CartResponseDTO;
 import com.LaMusic.entity.Cart;
 import com.LaMusic.entity.CartItem;
 import com.LaMusic.services.CartService;
@@ -46,47 +48,45 @@ public class CartController {
 
 
     @GetMapping
-    public ResponseEntity<Cart> getMyCart() {
+    public ResponseEntity<CartResponseDTO> getMyCart() {
         UUID userId = AuthUtils.getLoggedUserId();
         Cart cart = cartService.findOrCreateCartByUserId(userId);
-        // Garante que os itens sejam carregados e retornados com o carrinho.
-        // O CartService.addToCart já faz isso. Para consistência, findOrCreateCartByUserId
-        // no service poderia também popular os itens, ou fazemos aqui.
-        // A implementação atual de addToCart no service já popula os itens.
-        // Se findOrCreateCartByUserId não popula, precisamos fazer aqui:
-        if (cart.getItems() == null || cart.getItems().isEmpty()) { // Otimização: só carrega se não tiver
-             // ou se a estratégia de fetch for LAZY e não foram carregados.
-             // A implementação atual de addToCart no service já popula os itens.
-             // findOrCreateCartByUserId não popula.
-             // Para garantir, vamos popular aqui.
+
+        // Garante que os itens estejam carregados
+        if (cart.getItems() == null || cart.getItems().isEmpty()) {
             cart.setItems(cartService.getCartItemsByCartId(cart.getId()));
         }
-        return ResponseEntity.ok(cart);
+
+        return ResponseEntity.ok(CartMapper.toDto(cart));
     }
 
-/*     @DeleteMapping("/items") 
-    public ResponseEntity<Void> clearMyCart() {
-        UUID userId = (UUID) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        cartService.clearCart(userId);
-        return ResponseEntity.noContent().build();
-    } */
 
     @GetMapping("/cart/by-id/{cartId}")
     public ResponseEntity<List<CartItem>> getCartItemsByCartId(@PathVariable UUID cartId) {
         return ResponseEntity.ok(cartService.getCartItemsByCartId(cartId));
     }
 
-    @DeleteMapping("/items/{productId}") // Ou /items/{cartItemId} se você usar o ID do CartItem
-    public ResponseEntity<Cart> removeItemFromCart(@PathVariable UUID productId) {
-    	UUID userId = AuthUtils.getLoggedUserId();
-        Cart updatedCart = cartService.removeItemFromCart(userId, productId); // Novo método no CartService
-        return ResponseEntity.ok(updatedCart);
+    // Remover um item específico do carrinho (por ID do produto)
+    @DeleteMapping("/items/{cartItemId}")
+    public ResponseEntity<CartResponseDTO> removeItemFromCart(@PathVariable UUID cartItemId) {
+        UUID userId = AuthUtils.getLoggedUserId();
+        Cart updatedCart = cartService.removeItemFromCart(userId, cartItemId);
+        return ResponseEntity.ok(CartMapper.toDto(updatedCart));
     }
 
-    @DeleteMapping("/clear") // Ou o endpoint que o frontend está usando para limpar o carrinho
-    public ResponseEntity<Cart> clearMyCart() { // Alterado de ResponseEntity<Void> para ResponseEntity<Cart>
-        UUID userId = (UUID) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Cart clearedCart = cartService.clearCart(userId); // cartService.clearCart agora retorna o Cart
-        return ResponseEntity.ok(clearedCart); // Retorna o carrinho (vazio)
+    // Esvaziar completamente o carrinho
+    @DeleteMapping("/clear")
+    public ResponseEntity<CartResponseDTO> clearMyCart() {
+        UUID userId = AuthUtils.getLoggedUserId();
+        Cart clearedCart = cartService.clearCart(userId);
+        return ResponseEntity.ok(CartMapper.toDto(clearedCart));
+    }
+    
+ // Finalizar compra (exemplo)
+    @PostMapping("/checkout")
+    public ResponseEntity<String> checkoutCart() {
+        UUID userId = AuthUtils.getLoggedUserId();
+        cartService.checkout(userId); // Você deve ter um método que processa a venda e limpa o carrinho
+        return ResponseEntity.ok("Compra finalizada com sucesso!");
     }
 }
