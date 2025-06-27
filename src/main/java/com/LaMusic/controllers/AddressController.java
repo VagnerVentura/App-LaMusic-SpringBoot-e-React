@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.LaMusic.dto.AddressDTO;
 import com.LaMusic.services.AddressService;
+import com.LaMusic.util.AuthUtils;
 
 import lombok.RequiredArgsConstructor;
 
@@ -26,6 +27,12 @@ public class AddressController {
 
     private final AddressService service;
 
+    @GetMapping("/me")
+    public ResponseEntity<List<AddressDTO>> getMyAddresses() {
+        UUID userId = AuthUtils.getLoggedUserId();
+        return ResponseEntity.ok(service.getAllByUser(userId));
+    }
+    
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<AddressDTO>> getByUser(@PathVariable UUID userId) {
         return ResponseEntity.ok(service.getAllByUser(userId));

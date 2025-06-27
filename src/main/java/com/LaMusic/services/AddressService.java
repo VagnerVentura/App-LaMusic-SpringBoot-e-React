@@ -11,6 +11,7 @@ import com.LaMusic.entity.Address;
 import com.LaMusic.entity.User;
 import com.LaMusic.repositories.AddressRepository;
 import com.LaMusic.repositories.UserRepository;
+import com.LaMusic.util.AuthUtils;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,15 @@ public class AddressService {
     private final UserRepository userRepository;
     private final AddressMapper mapper;
 
+    public AddressDTO create(AddressDTO dto) {
+        UUID userId = AuthUtils.getLoggedUserId();
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Usuário autenticado não encontrado"));
+
+        Address address = mapper.toEntity(dto, user);
+        return mapper.toDTO(addressRepository.save(address));
+    }
+    
     public List<AddressDTO> getAllByUser(UUID userId) {
         return addressRepository.findByUserId(userId).stream()
                 .map(mapper::toDTO)
@@ -38,14 +48,6 @@ public class AddressService {
     public AddressDTO getById(UUID id) {
         return mapper.toDTO(addressRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Address not found")));
-    }
-
-    public AddressDTO create(AddressDTO dto) {
-        User user = userRepository.findById(dto.getUserId())
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-        Address address = mapper.toEntity(dto, user);
-        return mapper.toDTO(addressRepository.save(address));
     }
 
     public AddressDTO update(UUID id, AddressDTO dto) {

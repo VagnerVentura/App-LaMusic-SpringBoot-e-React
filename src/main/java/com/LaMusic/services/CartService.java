@@ -133,24 +133,25 @@ public class CartService {
     }
 
     @Transactional
-    public Cart clearCart(UUID userId) { // Modificado para retornar Cart
+    public Cart clearCart(UUID userId) {
         logger.info("clearCart - Início: userId={}", userId);
+
         Cart cart = findCartByUserId(userId);
         logger.debug("clearCart - Carrinho encontrado: cartId={}", cart.getId());
-        
+
         if (cart.getItems() != null && !cart.getItems().isEmpty()) {
-            logger.info("clearCart - Removendo {} itens do cartId={}", cart.getItems().size(), cart.getId());
-            // Para orphanRemoval=true, limpar a coleção e salvar o pai é suficiente.
-            // A deleção explícita garante, mas pode ser redundante.
-            cartItemRepository.deleteAllInBatch(new ArrayList<>(cart.getItems())); // Mais eficiente para múltiplos deletes
-            cart.getItems().clear(); 
-            logger.debug("clearCart - Itens deletados e coleção em memória limpa.");
+            logger.info("clearCart - Removendo itens via clear() (orphanRemoval=true) do cartId={}", cart.getId());
+            
+            // ⚠️ IMPORTANTE: não use deleteAllInBatch
+            cart.getItems().clear(); // orphanRemoval = true cuidará do delete no flush
+
         } else {
-            logger.info("clearCart - Carrinho já estava vazio ou sem itens: cartId={}", cart.getId());
+            logger.info("clearCart - Carrinho já estava vazio: cartId={}", cart.getId());
         }
-        Cart savedCart = cartRepository.save(cart); // Salva o carrinho com a lista de itens vazia
+
+        Cart savedCart = cartRepository.save(cart);
         logger.info("clearCart - Fim: userId={}, cartId={}", userId, savedCart.getId());
-        return savedCart; // Retorna o carrinho (agora vazio)
+        return savedCart;
     }
 
     // Este método é auxiliar e não precisa de alteração para o contrato de resposta.
