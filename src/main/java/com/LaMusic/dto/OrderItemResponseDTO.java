@@ -7,5 +7,6 @@ public record OrderItemResponseDTO(
     UUID productId,
     String productName,
     Integer quantity,
-    BigDecimal price
+    BigDecimal price,
+    String imageUrl
 ) {}
