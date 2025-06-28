@@ -107,10 +107,11 @@ public class OrderService {
         	    .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         	order.setSubtotal(subtotal);
+        	order.setStatus("confirmed");
 
         	// Se você tiver frete, cupom, etc., ajuste aqui:
         	order.setTotalAmount(subtotal); // ou subtotal + frete - desconto
-
+ 
 
         // Salvar pedido e deletar carrinho
         orderRepository.saveAndFlush(order);

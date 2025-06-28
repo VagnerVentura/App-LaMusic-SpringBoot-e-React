@@ -43,6 +43,7 @@ public class OrderMapper {
             order.getId(),
             order.getCreatedAt(),
             order.getTotalAmount(),
+            order.getStatus(),
             mapToAddressDto(order.getShippingAddress()),
             mapToAddressDto(order.getBillingAddress()),
             items

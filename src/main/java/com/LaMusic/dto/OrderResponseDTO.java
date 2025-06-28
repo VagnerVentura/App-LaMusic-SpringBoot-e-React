@@ -9,6 +9,7 @@ public record OrderResponseDTO(
     UUID orderId,
     LocalDate orderDate,
     BigDecimal totalAmount,
+    String status,
     OrderAddressDTO shippingAddress,
     OrderAddressDTO billingAddress,
     List<OrderItemResponseDTO> items
